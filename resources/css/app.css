@@ -1,0 +1,20 @@
+@import "tailwindcss";
+
+/* Archivos que Tailwind debe escanear */
+@source "../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php";
+@source "../../storage/framework/views/*.php";
+@source "../**/*.blade.php";
+@source "../**/*.js";
+@source "../../public/frontend/**/*.html";
+
+/* Tema personalizado (igual que en tu Figma) */
+@theme {
+    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
+        'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
+@layer base {
+    [x-cloak] {
+        display: none !important;
+    }
+}
