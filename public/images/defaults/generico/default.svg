@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-label="Imagen generica por defecto">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1c1917"/>
+      <stop offset="100%" stop-color="#57534e"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="800" fill="url(#bg)"/>
+  <circle cx="420" cy="320" r="110" fill="none" stroke="#f5f5f4" stroke-width="18"/>
+  <circle cx="780" cy="320" r="110" fill="none" stroke="#f5f5f4" stroke-width="18"/>
+  <path d="M320 520c70-55 170-85 280-85s210 30 280 85" fill="none" stroke="#f5f5f4" stroke-width="18" stroke-linecap="round"/>
+  <text x="80" y="740" fill="#fafaf9" font-family="Arial, sans-serif" font-size="68" font-weight="700">QuedadApps · Deporte</text>
+</svg>

@@ -9,6 +9,11 @@ class FrontendController extends Controller
 {
     public function buscar(Request $request)
     {
+        $sports = $this->availableSports();
+        $joinedPartidaIds = $request->user()
+            ? $request->user()->asistencias()->pluck('partida_id')->all()
+            : [];
+
         $partidas = Partida::query()
             ->with(['creador', 'asistencias.usuario'])
             ->withCount('asistencias')
@@ -22,19 +27,27 @@ class FrontendController extends Controller
         return view('frontend.buscar', [
             'partidas' => $partidas,
             'filtros' => $request->only(['deporte', 'lugar', 'fecha']),
+            'sports' => $sports,
+            'googleMapsApiKey' => config('services.google_maps.key'),
+            'joinedPartidaIds' => $joinedPartidaIds,
         ]);
     }
 
     public function calendario()
     {
         $partidas = Partida::query()
-            ->with('creador')
-            ->withCount('asistencias')
             ->orderBy('fecha')
             ->get()
-            ->groupBy(fn (Partida $partida) => $partida->fecha->locale('es')->translatedFormat('F Y'));
+            ->map(fn (Partida $partida) => [
+                'id' => $partida->id,
+                'title' => $partida->titulo,
+                'start' => $partida->fecha->toIso8601String(),
+                'url' => route('partidas.showPage', $partida),
+            ]);
 
-        return view('frontend.calendario', compact('partidas'));
+        return view('frontend.calendario', [
+            'calendarEvents' => $partidas,
+        ]);
     }
 
     public function asistencia(Request $request)
@@ -66,5 +79,19 @@ class FrontendController extends Controller
             'misPartidasIds' => $misPartidasIds,
             'proximasPartidas' => $proximasPartidas,
         ]);
+    }
+
+    protected function availableSports(): array
+    {
+        return [
+            'Futbol',
+            'Padel',
+            'Baloncesto',
+            'Tenis',
+            'Running',
+            'Voleibol',
+            'Ciclismo',
+            'Natacion',
+        ];
     }
 }

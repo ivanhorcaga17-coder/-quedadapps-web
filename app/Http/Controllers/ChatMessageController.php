@@ -10,12 +10,12 @@ class ChatMessageController extends Controller
     public function store(Request $request, Partida $partida)
     {
         $validated = $request->validate([
-            'message' => 'required|string|max:1000',
+            'mensaje' => 'required|string|max:1000',
         ]);
 
         $partida->chatMessages()->create([
-            'user_id' => $request->user()->id,
-            'message' => $validated['message'],
+            'usuario_id' => $request->user()->id,
+            'mensaje' => $validated['mensaje'],
         ]);
 
         return back()->with('success', 'Mensaje enviado al chat de la partida.');

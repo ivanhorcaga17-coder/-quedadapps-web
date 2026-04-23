@@ -61,7 +61,16 @@ class User extends Authenticatable
 
     public function chatMessages()
     {
-        return $this->hasMany(ChatMessage::class, 'user_id');
+        return $this->hasMany(ChatMessage::class, 'usuario_id');
+    }
+
+    protected function avatarUrl(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->foto
+                ? asset('frontend/img/perfiles/' . $this->foto)
+                : asset('frontend/img/perfil.png'),
+        );
     }
 
     public function isAdmin(): bool

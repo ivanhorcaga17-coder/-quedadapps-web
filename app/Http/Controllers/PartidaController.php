@@ -3,14 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Models\Partida;
+use App\Models\User;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class PartidaController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth')->only(['create', 'store']);
+        $this->middleware('auth')->only(['create', 'store', 'preview', 'finalize', 'destroy']);
     }
 
     public function index(Request $request)
@@ -22,41 +24,38 @@ class PartidaController extends Controller
 
     public function create()
     {
-        return view('frontend.crear');
+        return view('frontend.crear', [
+            'sports' => $this->availableSports(),
+            'googleMapsApiKey' => config('services.google_maps.key'),
+        ]);
     }
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'deporte' => 'required|string',
             'fecha' => 'required|date',
             'lugar' => 'required|string',
             'max_jugadores' => 'required|integer|min:1',
-            'imagen' => 'nullable|image|max:2048'
+            'imagen' => 'nullable|image|max:2048',
         ]);
 
-        $titulo = $request->deporte . ' en ' . $request->lugar;
+        $imagen = $request->hasFile('imagen')
+            ? $request->file('imagen')->store('temp/partidas', 'public')
+            : $this->resolveDefaultImage($validated['deporte']);
 
-        if ($request->hasFile('imagen')) {
-            $imagen = $request->file('imagen')->store('partidas', 'public');
-        } else {
-            $imagen = 'default/partida_default.jpg';
-        }
-
-        $partida = $request->user()->partidasCreadas()->create([
-            'titulo' => $titulo,
-            'deporte' => $request->deporte,
-            'fecha' => $request->fecha,
-            'lugar' => $request->lugar,
-            'max_jugadores' => $request->max_jugadores,
+        $pendingPartida = [
+            'titulo' => $validated['deporte'] . ' en ' . $validated['lugar'],
+            'deporte' => $validated['deporte'],
+            'fecha' => $validated['fecha'],
+            'lugar' => $validated['lugar'],
+            'max_jugadores' => $validated['max_jugadores'],
             'imagen' => $imagen,
-        ]);
+        ];
 
-        if ($request->expectsJson()) {
-            return response()->json($partida->load('creador'), 201);
-        }
+        $request->session()->put('pending_partida', $pendingPartida);
 
-        return redirect()->route('partidas.confirmar', $partida->id);
+        return redirect()->route('partidas.preview');
     }
 
     public function show(Partida $partida)
@@ -64,14 +63,67 @@ class PartidaController extends Controller
         return response()->json($partida->load('creador'));
     }
 
+    public function preview(Request $request)
+    {
+        $pendingPartida = $request->session()->get('pending_partida');
+
+        abort_unless($pendingPartida, 404);
+
+        return view('frontend.confirmar-creacion', [
+            'pendingPartida' => $pendingPartida,
+            'googleMapsApiKey' => config('services.google_maps.key'),
+        ]);
+    }
+
+    public function finalize(Request $request)
+    {
+        $pendingPartida = $request->session()->get('pending_partida');
+
+        abort_unless($pendingPartida, 404);
+
+        $validated = $request->validate([
+            'jugadores' => 'nullable|string|max:1000',
+        ]);
+
+        $imagen = $this->movePendingImageToFinalLocation($pendingPartida['imagen']);
+
+        $partida = $request->user()->partidasCreadas()->create([
+            'titulo' => $pendingPartida['titulo'],
+            'deporte' => $pendingPartida['deporte'],
+            'fecha' => $pendingPartida['fecha'],
+            'lugar' => $pendingPartida['lugar'],
+            'max_jugadores' => $pendingPartida['max_jugadores'],
+            'imagen' => $imagen,
+        ]);
+
+        $this->syncInitialPlayers($partida, $request->user(), $validated['jugadores'] ?? null);
+
+        $request->session()->forget('pending_partida');
+
+        return redirect()->route('partidas.showPage', $partida)
+            ->with('success', 'Partida creada correctamente.');
+    }
+
     public function confirmar(Partida $partida)
+    {
+        return $this->showPage($partida);
+    }
+
+    public function showPage(Partida $partida)
     {
         $partida->load([
             'creador',
-            'chatMessages.user',
+            'asistencias.usuario',
+            'chatMessages.usuario',
         ]);
 
-        return view('frontend.confirmacion', compact('partida'));
+        return view('frontend.confirmacion', [
+            'partida' => $partida,
+            'googleMapsApiKey' => config('services.google_maps.key'),
+            'authUserJoined' => auth()->check()
+                ? $partida->asistencias->contains(fn ($asistencia) => $asistencia->usuario_id === auth()->id())
+                : false,
+        ]);
     }
 
     public function update(Request $request, Partida $partida)
@@ -94,8 +146,90 @@ class PartidaController extends Controller
 
     public function destroy(Partida $partida)
     {
+        abort_unless(auth()->id() === $partida->creador_id, 403);
+
         $partida->delete();
 
-        return response()->json(['message' => 'Partida eliminada correctamente.']);
+        return redirect()->route('buscar')
+            ->with('success', 'Tu partida se ha eliminado correctamente.');
+    }
+
+    protected function resolveDefaultImage(string $deporte): string
+    {
+        $normalized = Str::of($deporte)->lower()->ascii()->value();
+
+        $folder = match (true) {
+            str_contains($normalized, 'futbol') => 'images/defaults/futbol',
+            str_contains($normalized, 'padel') => 'images/defaults/padel',
+            default => 'images/defaults/generico',
+        };
+
+        $files = collect(glob(public_path($folder . '/*')))
+            ->filter(fn ($path) => is_file($path))
+            ->values();
+
+        if ($files->isEmpty()) {
+            return 'images/defaults/generico/default.svg';
+        }
+
+        return Str::after($files->random(), public_path() . '/');
+    }
+
+    protected function movePendingImageToFinalLocation(string $imagePath): string
+    {
+        if (! str_starts_with($imagePath, 'temp/')) {
+            return $imagePath;
+        }
+
+        $finalPath = 'partidas/' . basename($imagePath);
+
+        if (Storage::disk('public')->exists($imagePath)) {
+            Storage::disk('public')->move($imagePath, $finalPath);
+        }
+
+        return $finalPath;
+    }
+
+    protected function syncInitialPlayers(Partida $partida, User $creator, ?string $rawPlayers): void
+    {
+        $userIds = collect([$creator->id]);
+
+        $tokens = collect(explode(',', (string) $rawPlayers))
+            ->map(fn ($value) => trim($value))
+            ->filter();
+
+        foreach ($tokens as $token) {
+            $matchedUser = is_numeric($token)
+                ? User::find((int) $token)
+                : User::query()
+                    ->where('nombre', 'like', '%' . $token . '%')
+                    ->orWhere('email', 'like', '%' . $token . '%')
+                    ->first();
+
+            if ($matchedUser) {
+                $userIds->push($matchedUser->id);
+            }
+        }
+
+        $partida->asistencias()->createMany(
+            $userIds->unique()->map(fn ($userId) => [
+                'usuario_id' => $userId,
+                'estado' => 'confirmado',
+            ])->values()->all()
+        );
+    }
+
+    protected function availableSports(): array
+    {
+        return [
+            'Futbol',
+            'Padel',
+            'Baloncesto',
+            'Tenis',
+            'Running',
+            'Voleibol',
+            'Ciclismo',
+            'Natacion',
+        ];
     }
 }

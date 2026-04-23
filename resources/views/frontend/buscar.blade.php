@@ -75,7 +75,7 @@
             @forelse($partidas as $partida)
                 <article class="overflow-hidden rounded-[32px] border border-stone-200 bg-white shadow-[0_24px_80px_rgba(28,25,23,0.08)]">
                     <img
-                        src="{{ asset('storage/' . $partida->imagen) }}"
+                        src="{{ $partida->image_url }}"
                         alt="{{ $partida->titulo }}"
                         class="h-56 w-full object-cover"
                     >
@@ -97,17 +97,51 @@
                             <p>Creador: {{ $partida->creador?->name ?? 'Usuario no disponible' }}</p>
                         </div>
 
+                        @if($partida->starts_soon)
+                            <div class="rounded-2xl bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">
+                                Empieza pronto, {{ $partida->starts_in_text }}.
+                            </div>
+                        @endif
+
+                        @if($googleMapsApiKey)
+                            <div class="overflow-hidden rounded-3xl border border-stone-200 bg-stone-50">
+                                <div
+                                    class="js-google-map h-[180px] w-full"
+                                    data-location="{{ $partida->lugar }}"
+                                    data-zoom="15"
+                                ></div>
+                            </div>
+                        @endif
+
                         <div class="flex flex-wrap gap-3">
-                            <a href="{{ route('partidas.confirmar', $partida) }}" class="rounded-full bg-stone-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-stone-700">
+                            <a href="{{ route('partidas.showPage', $partida) }}" class="rounded-full bg-stone-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-stone-700">
                                 Ver detalle
                             </a>
                             @auth
-                                <form action="{{ route('asistencia.join', $partida) }}" method="POST">
-                                    @csrf
-                                    <button class="rounded-full border border-stone-300 px-5 py-3 text-sm font-semibold transition hover:bg-stone-100">
-                                        Apuntarme
-                                    </button>
-                                </form>
+                                @if(auth()->id() === $partida->creador_id)
+                                    <form action="{{ route('partidas.destroy', $partida) }}" method="POST" onsubmit="return confirm('¿Seguro que quieres borrar tu partida?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button class="rounded-full bg-red-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-red-700">
+                                            Borrar partida
+                                        </button>
+                                    </form>
+                                @elseif(in_array($partida->id, $joinedPartidaIds, true))
+                                    <form action="{{ route('asistencia.leave', $partida) }}" method="POST">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button class="rounded-full border border-red-300 px-5 py-3 text-sm font-semibold text-red-700 transition hover:bg-red-50">
+                                            Ya apuntado, cancelar
+                                        </button>
+                                    </form>
+                                @else
+                                    <form action="{{ route('asistencia.join', $partida) }}" method="POST">
+                                        @csrf
+                                        <button class="rounded-full border border-stone-300 px-5 py-3 text-sm font-semibold transition hover:bg-stone-100">
+                                            Apuntarme
+                                        </button>
+                                    </form>
+                                @endif
                             @else
                                 <a href="{{ route('login') }}" class="rounded-full border border-stone-300 px-5 py-3 text-sm font-semibold transition hover:bg-stone-100">
                                     Inicia sesión
@@ -129,5 +163,51 @@
     </main>
 
     @include('partials.footer-banner')
+
+    @if($googleMapsApiKey)
+        <script>
+            function initMiniMaps() {
+                const mapNodes = document.querySelectorAll('.js-google-map');
+
+                if (!mapNodes.length || !window.google?.maps) {
+                    return;
+                }
+
+                const geocoder = new google.maps.Geocoder();
+
+                mapNodes.forEach((node) => {
+                    const location = node.dataset.location;
+                    const zoom = Number(node.dataset.zoom || 15);
+
+                    if (!location) {
+                        return;
+                    }
+
+                    const map = new google.maps.Map(node, {
+                        zoom,
+                        disableDefaultUI: true,
+                        gestureHandling: 'cooperative',
+                        mapTypeControl: false,
+                        streetViewControl: false,
+                        fullscreenControl: false,
+                    });
+
+                    geocoder.geocode({ address: location }, (results, status) => {
+                        if (status === 'OK' && results?.[0]?.geometry?.location) {
+                            map.setCenter(results[0].geometry.location);
+                            new google.maps.Marker({
+                                map,
+                                position: results[0].geometry.location,
+                            });
+                            return;
+                        }
+
+                        node.innerHTML = '<div class="flex h-full items-center justify-center bg-stone-100 px-6 text-center text-sm text-stone-500">No hemos podido cargar el mapa de esta ubicación.</div>';
+                    });
+                });
+            }
+        </script>
+        <script src="https://maps.googleapis.com/maps/api/js?key={{ $googleMapsApiKey }}&libraries=places&callback=initMiniMaps" async defer></script>
+    @endif
 </body>
 </html>

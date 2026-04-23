@@ -11,8 +11,8 @@ class ChatMessage extends Model
 
     protected $fillable = [
         'partida_id',
-        'user_id',
-        'message',
+        'usuario_id',
+        'mensaje',
     ];
 
     public function partida()
@@ -20,8 +20,8 @@ class ChatMessage extends Model
         return $this->belongsTo(Partida::class, 'partida_id');
     }
 
-    public function user()
+    public function usuario()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'usuario_id');
     }
 }

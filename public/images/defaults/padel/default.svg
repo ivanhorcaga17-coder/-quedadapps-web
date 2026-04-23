@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-label="Imagen por defecto de padel">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#292524"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="800" fill="url(#bg)"/>
+  <rect x="170" y="140" width="860" height="520" rx="32" fill="none" stroke="#e7e5e4" stroke-width="10"/>
+  <line x1="600" y1="140" x2="600" y2="660" stroke="#e7e5e4" stroke-width="10"/>
+  <line x1="170" y1="400" x2="1030" y2="400" stroke="#e7e5e4" stroke-width="10"/>
+  <text x="80" y="740" fill="#fafaf9" font-family="Arial, sans-serif" font-size="68" font-weight="700">QuedadApps · Padel</text>
+</svg>

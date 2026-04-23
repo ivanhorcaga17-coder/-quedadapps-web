@@ -22,8 +22,8 @@
                     </a>
                 @endif
 
-                <a href="{{ route('perfil') }}" class="rounded-full border border-stone-300 px-4 py-2 text-sm font-semibold transition hover:bg-stone-100">
-                    Perfil
+                <a href="{{ route('perfil') }}" class="inline-flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border border-stone-300 bg-stone-100 transition hover:bg-stone-200">
+                    <img src="{{ auth()->user()->avatar_url }}" alt="{{ auth()->user()->name }}" class="h-full w-full object-cover">
                 </a>
 
                 <form action="{{ route('logout') }}" method="POST">

@@ -23,9 +23,12 @@ Route::get('/asistencia', [FrontendController::class, 'asistencia'])->name('asis
 Route::middleware('auth')->group(function () {
     Route::get('/crear-partidas', [PartidaController::class, 'create'])->name('partidas.create');
     Route::post('/crear-partidas', [PartidaController::class, 'store'])->name('partidas.store');
+    Route::get('/partidas/confirmar', [PartidaController::class, 'preview'])->name('partidas.preview');
+    Route::post('/partidas/confirmar', [PartidaController::class, 'finalize'])->name('partidas.finalize');
 });
 
 /* CONFIRMAR PARTIDA */
+Route::get('/partida/{partida}', [PartidaController::class, 'showPage'])->name('partidas.showPage');
 Route::get('/partida/{partida}/confirmar', [PartidaController::class, 'confirmar'])->name('partidas.confirmar');
 
 /* AUTH */
@@ -46,6 +49,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/asistencia/{partida}', [AsistenciaController::class, 'join'])->name('asistencia.join');
     Route::delete('/asistencia/{partida}', [AsistenciaController::class, 'leave'])->name('asistencia.leave');
     Route::post('/partida/{partida}/chat', [ChatMessageController::class, 'store'])->name('partidas.chat.store');
+    Route::delete('/partida/{partida}', [PartidaController::class, 'destroy'])->name('partidas.destroy');
 });
 
 /* DESCARGAR */
