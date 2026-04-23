@@ -50,6 +50,11 @@ class FrontendController extends Controller
         ]);
     }
 
+    public function acerca()
+    {
+        return view('frontend.acerca');
+    }
+
     public function asistencia(Request $request)
     {
         $user = $request->user();
@@ -84,14 +89,73 @@ class FrontendController extends Controller
     protected function availableSports(): array
     {
         return [
-            'Futbol',
-            'Padel',
+            'Fútbol',
+            'Fútbol sala',
+            'Fútbol 7',
+            'Fútbol 11',
             'Baloncesto',
+            'Baloncesto 3x3',
+            'Pádel',
             'Tenis',
-            'Running',
+            'Tenis de mesa',
             'Voleibol',
+            'Vóley playa',
+            'Balonmano',
+            'Waterpolo',
+            'Rugby',
+            'Rugby 7',
+            'Hockey',
+            'Hockey hierba',
+            'Hockey patines',
+            'Béisbol',
+            'Softbol',
+            'Frontón',
+            'Pickleball',
+            'Squash',
+            'Bádminton',
+            'Golf',
+            'Mini golf',
+            'Running',
+            'Salir a correr',
+            'Caminar',
             'Ciclismo',
-            'Natacion',
+            'Senderismo',
+            'Natación',
+            'Crossfit',
+            'Yoga',
+            'Pilates',
+            'Gimnasio',
+            'Entrenamiento funcional',
+            'Calistenia',
+            'Trail running',
+            'Triatlón',
+            'Patinaje',
+            'Skate',
+            'Longboard',
+            'Surf',
+            'Bodyboard',
+            'Kitesurf',
+            'Windsurf',
+            'Paddle surf',
+            'Piragüismo',
+            'Kayak',
+            'Remo',
+            'Escalada',
+            'Escalada indoor',
+            'Barranquismo',
+            'Esquí',
+            'Snowboard',
+            'Artes marciales',
+            'Judo',
+            'Karate',
+            'Taekwondo',
+            'Boxeo',
+            'Kickboxing',
+            'Muay thai',
+            'Ajedrez',
+            'Petanca',
+            'Dardos',
+            'Ultimate frisbee',
         ];
     }
 }

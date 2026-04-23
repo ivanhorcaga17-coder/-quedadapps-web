@@ -15,6 +15,9 @@
             <a href="{{ route('descargar') }}#reviews" class="rounded-full border border-white/20 px-6 py-3 text-center font-semibold text-white transition hover:bg-white/10">
                 Ver valoraciones
             </a>
+            <a href="{{ route('acerca') }}" class="rounded-full border border-white/20 px-6 py-3 text-center font-semibold text-white transition hover:bg-white/10">
+                Acerca de
+            </a>
         </div>
     </div>
 

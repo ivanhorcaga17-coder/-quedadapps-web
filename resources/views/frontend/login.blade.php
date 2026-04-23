@@ -41,6 +41,7 @@
             <div>
                 <label class="block text-sm font-medium mb-1">Email</label>
                 <input type="email" name="email"
+                       value="{{ old('email') }}"
                        class="w-full px-4 py-3 border rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-black"
                        required>
             </div>
@@ -61,6 +62,17 @@
                     </button>
                 </div>
             </div>
+
+            <label class="flex items-center gap-3 text-sm text-gray-700">
+                <input
+                    type="checkbox"
+                    name="remember"
+                    value="1"
+                    @checked(old('remember'))
+                    class="h-4 w-4 rounded border-gray-300 text-black focus:ring-black"
+                >
+                Recordarme en este dispositivo
+            </label>
 
             <button type="submit"
                     class="w-full bg-black text-white py-3 rounded-lg text-lg font-semibold hover:bg-gray-900 transition">

@@ -17,6 +17,7 @@ use App\Http\Controllers\Admin\AdminController;
 Route::get('/', fn() => view('frontend.index'))->name('index');
 Route::get('/buscar-partidas', [FrontendController::class, 'buscar'])->name('buscar');
 Route::get('/calendario', [FrontendController::class, 'calendario'])->name('calendario');
+Route::get('/acerca-de', [FrontendController::class, 'acerca'])->name('acerca');
 Route::get('/asistencia', [FrontendController::class, 'asistencia'])->name('asistencia');
 
 /* CREAR PARTIDAS */
@@ -49,6 +50,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/asistencia/{partida}', [AsistenciaController::class, 'join'])->name('asistencia.join');
     Route::delete('/asistencia/{partida}', [AsistenciaController::class, 'leave'])->name('asistencia.leave');
     Route::post('/partida/{partida}/chat', [ChatMessageController::class, 'store'])->name('partidas.chat.store');
+    Route::delete('/partida/{partida}/chat/{chatMessage}', [ChatMessageController::class, 'destroy'])->name('partidas.chat.destroy');
     Route::delete('/partida/{partida}', [PartidaController::class, 'destroy'])->name('partidas.destroy');
 });
 

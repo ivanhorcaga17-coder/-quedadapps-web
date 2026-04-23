@@ -113,25 +113,26 @@
                             </div>
                         @endif
 
+                        <a
+                            href="https://www.google.com/maps/dir/?api=1&destination={{ urlencode($partida->lugar) }}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="inline-flex w-full items-center justify-center rounded-2xl bg-[linear-gradient(135deg,#111827_0%,#1f2937_55%,#0f766e_100%)] px-5 py-3 text-sm font-semibold text-white shadow-[0_18px_50px_rgba(17,24,39,0.18)] transition hover:scale-[1.01] hover:shadow-[0_24px_60px_rgba(15,118,110,0.22)]"
+                        >
+                            Como llegar al sitio
+                        </a>
+
                         <div class="flex flex-wrap gap-3">
                             <a href="{{ route('partidas.showPage', $partida) }}" class="rounded-full bg-stone-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-stone-700">
                                 Ver detalle
                             </a>
                             @auth
-                                @if(auth()->id() === $partida->creador_id)
-                                    <form action="{{ route('partidas.destroy', $partida) }}" method="POST" onsubmit="return confirm('¿Seguro que quieres borrar tu partida?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button class="rounded-full bg-red-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-red-700">
-                                            Borrar partida
-                                        </button>
-                                    </form>
-                                @elseif(in_array($partida->id, $joinedPartidaIds, true))
+                                @if(in_array($partida->id, $joinedPartidaIds, true))
                                     <form action="{{ route('asistencia.leave', $partida) }}" method="POST">
                                         @csrf
                                         @method('DELETE')
                                         <button class="rounded-full border border-red-300 px-5 py-3 text-sm font-semibold text-red-700 transition hover:bg-red-50">
-                                            Ya apuntado, cancelar
+                                            Desapuntarme
                                         </button>
                                     </form>
                                 @else
@@ -139,6 +140,16 @@
                                         @csrf
                                         <button class="rounded-full border border-stone-300 px-5 py-3 text-sm font-semibold transition hover:bg-stone-100">
                                             Apuntarme
+                                        </button>
+                                    </form>
+                                @endif
+
+                                @if(auth()->id() === $partida->creador_id)
+                                    <form action="{{ route('partidas.destroy', $partida) }}" method="POST" onsubmit="return confirm('¿Seguro que quieres borrar tu partida?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button class="rounded-full bg-red-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-red-700">
+                                            Borrar partida
                                         </button>
                                     </form>
                                 @endif

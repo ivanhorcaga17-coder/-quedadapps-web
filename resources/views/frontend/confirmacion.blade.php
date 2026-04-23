@@ -59,6 +59,14 @@
                     <div>
                         <p class="text-sm uppercase tracking-[0.2em] text-stone-400">Ubicación</p>
                         <p class="mt-2 text-lg font-semibold">{{ $partida->lugar }}</p>
+                        <a
+                            href="https://www.google.com/maps/dir/?api=1&destination={{ urlencode($partida->lugar) }}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="mt-4 inline-flex items-center rounded-2xl bg-[linear-gradient(135deg,#111827_0%,#1f2937_55%,#0f766e_100%)] px-5 py-3 text-sm font-semibold text-white shadow-[0_18px_50px_rgba(17,24,39,0.18)] transition hover:scale-[1.01] hover:shadow-[0_24px_60px_rgba(15,118,110,0.22)]"
+                        >
+                            Como llegar al sitio
+                        </a>
                     </div>
                 </div>
             </div>
@@ -78,23 +86,12 @@
                     <p class="text-sm uppercase tracking-[0.25em] text-stone-400">Ajustes rápidos</p>
                     <div class="mt-5 flex flex-col gap-3">
                         @auth
-                            @if(auth()->id() === $partida->creador_id)
-                                <div class="rounded-2xl bg-stone-50 px-4 py-3 text-sm text-stone-600">
-                                    Estás viendo tu propia partida. Puedes borrarla cuando quieras.
-                                </div>
-                                <form action="{{ route('partidas.destroy', $partida) }}" method="POST" onsubmit="return confirm('¿Seguro que quieres borrar tu partida?');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button class="w-full rounded-full bg-red-600 px-5 py-3 font-semibold text-white transition hover:bg-red-700">
-                                        Borrar mi partida
-                                    </button>
-                                </form>
-                            @elseif($authUserJoined)
+                            @if($authUserJoined)
                                 <form action="{{ route('asistencia.leave', $partida) }}" method="POST">
                                     @csrf
                                     @method('DELETE')
                                     <button class="w-full rounded-full border border-red-300 px-5 py-3 font-semibold text-red-700 transition hover:bg-red-50">
-                                        Ya estás apuntado, cancelar
+                                        Desapuntarme de la partida
                                     </button>
                                 </form>
                             @else
@@ -102,6 +99,19 @@
                                     @csrf
                                     <button class="w-full rounded-full bg-stone-900 px-5 py-3 font-semibold text-white transition hover:bg-stone-700">
                                         Apuntarme a la partida
+                                    </button>
+                                </form>
+                            @endif
+
+                            @if(auth()->id() === $partida->creador_id)
+                                <div class="rounded-2xl bg-stone-50 px-4 py-3 text-sm text-stone-600">
+                                    Como creador también puedes apuntarte o desapuntarte. Borrar la partida es una acción aparte.
+                                </div>
+                                <form action="{{ route('partidas.destroy', $partida) }}" method="POST" onsubmit="return confirm('¿Seguro que quieres borrar tu partida?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button class="w-full rounded-full bg-red-600 px-5 py-3 font-semibold text-white transition hover:bg-red-700">
+                                        Borrar mi partida
                                     </button>
                                 </form>
                             @endif
@@ -153,12 +163,30 @@
                 <div class="mt-6 max-h-[360px] space-y-3 overflow-y-auto pr-2">
                     @forelse($partida->chatMessages as $message)
                         <article class="rounded-2xl bg-stone-50 p-4">
-                            <div class="flex items-center gap-3">
-                                <img src="{{ $message->usuario?->avatar_url ?? asset('frontend/img/perfil.png') }}" alt="" class="h-10 w-10 rounded-full object-cover border border-stone-200">
-                                <div>
-                                    <p class="font-semibold text-stone-900">{{ $message->usuario?->name ?? 'Usuario' }}</p>
-                                    <p class="text-xs text-stone-500">{{ $message->created_at?->format('d/m/Y H:i') }}</p>
+                            <div class="flex items-start justify-between gap-4">
+                                <div class="flex items-center gap-3">
+                                    <img src="{{ $message->usuario?->avatar_url ?? asset('frontend/img/perfil.png') }}" alt="" class="h-10 w-10 rounded-full object-cover border border-stone-200">
+                                    <div>
+                                        <p class="font-semibold text-stone-900">{{ $message->usuario?->name ?? 'Usuario' }}</p>
+                                        <p class="text-xs text-stone-500">{{ $message->created_at?->format('d/m/Y H:i') }}</p>
+                                    </div>
                                 </div>
+
+                                @auth
+                                    @if(
+                                        auth()->id() === $message->usuario_id
+                                        || auth()->id() === $partida->creador_id
+                                        || auth()->user()->isAdmin()
+                                    )
+                                        <form action="{{ route('partidas.chat.destroy', [$partida, $message]) }}" method="POST" onsubmit="return confirm('¿Seguro que quieres borrar este mensaje?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button class="rounded-full border border-red-300 px-3 py-2 text-xs font-semibold text-red-700 transition hover:bg-red-50">
+                                                Borrar
+                                            </button>
+                                        </form>
+                                    @endif
+                                @endauth
                             </div>
                             <p class="mt-3 text-sm leading-6 text-stone-700">{{ $message->mensaje }}</p>
                         </article>

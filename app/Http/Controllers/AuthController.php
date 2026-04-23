@@ -63,10 +63,14 @@ class AuthController extends Controller
     {
         $credentials = $request->validate([
             'email' => 'required|email',
-            'password' => 'required'
+            'password' => 'required',
+            'remember' => 'nullable|boolean',
         ]);
 
-        if (Auth::attempt($credentials)) {
+        if (Auth::attempt(
+            $request->only('email', 'password'),
+            $request->boolean('remember')
+        )) {
             $request->session()->regenerate();
 
             $user = $request->user();
@@ -78,7 +82,7 @@ class AuthController extends Controller
 
         return back()->withErrors([
             'email' => 'Credenciales incorrectas',
-        ]);
+        ])->onlyInput('email', 'remember');
     }
 
     public function logout(Request $request)

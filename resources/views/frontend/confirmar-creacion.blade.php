@@ -47,6 +47,14 @@
                     <div>
                         <p class="text-sm uppercase tracking-[0.2em] text-stone-400">Ubicación</p>
                         <p class="mt-2 text-lg font-semibold">{{ $pendingPartida['lugar'] }}</p>
+                        <a
+                            href="https://www.google.com/maps/dir/?api=1&destination={{ urlencode($pendingPartida['lugar']) }}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="mt-4 inline-flex items-center rounded-2xl bg-[linear-gradient(135deg,#111827_0%,#1f2937_55%,#0f766e_100%)] px-5 py-3 text-sm font-semibold text-white shadow-[0_18px_50px_rgba(17,24,39,0.18)] transition hover:scale-[1.01] hover:shadow-[0_24px_60px_rgba(15,118,110,0.22)]"
+                        >
+                            Como llegar al sitio
+                        </a>
                     </div>
                 </div>
             </section>
