@@ -21,6 +21,20 @@
         </section>
 
         <section class="mt-8 overflow-hidden rounded-[32px] border border-stone-200 bg-white p-4 shadow-[0_24px_80px_rgba(28,25,23,0.08)] sm:p-6">
+            <div class="mb-5 grid gap-3 rounded-[28px] border border-stone-200 bg-stone-50 p-4 text-sm text-stone-600 sm:grid-cols-3">
+                <div class="rounded-2xl border border-stone-200 bg-white px-4 py-3">
+                    <span class="font-semibold text-stone-900">Vista mensual</span>
+                    <p class="mt-1">Resumen general de todas las partidas programadas.</p>
+                </div>
+                <div class="rounded-2xl border border-stone-200 bg-white px-4 py-3">
+                    <span class="font-semibold text-stone-900">Vista semanal</span>
+                    <p class="mt-1">Ideal para localizar la actividad exacta de los próximos días.</p>
+                </div>
+                <div class="rounded-2xl border border-stone-200 bg-white px-4 py-3">
+                    <span class="font-semibold text-stone-900">Tema QuedadApps</span>
+                    <p class="mt-1">Blanco, negro y grises para encajar con el resto de la web.</p>
+                </div>
+            </div>
             <div id="calendar" class="min-h-[720px]"></div>
         </section>
     </main>
@@ -31,16 +45,45 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const calendarEl = document.getElementById('calendar');
+            let calendar;
 
-            const calendar = new FullCalendar.Calendar(calendarEl, {
+            const buildHeaderToolbar = () => window.innerWidth < 768
+                ? {
+                    left: 'today',
+                    center: 'title',
+                    right: 'prevCustom,nextCustom',
+                }
+                : {
+                    left: 'prevCustom,nextCustom today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay',
+                };
+
+            calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
                 locale: 'es',
                 height: 'auto',
-                headerToolbar: {
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: 'dayGridMonth,timeGridWeek',
+                buttonText: {
+                    today: 'hoy',
+                    month: 'mes',
+                    week: 'semana',
+                    day: 'día',
                 },
+                customButtons: {
+                    prevCustom: {
+                        text: 'anterior',
+                        click() {
+                            calendar.prev();
+                        },
+                    },
+                    nextCustom: {
+                        text: 'siguiente',
+                        click() {
+                            calendar.next();
+                        },
+                    },
+                },
+                headerToolbar: buildHeaderToolbar(),
                 events: @json($calendarEvents),
                 eventClick(info) {
                     if (info.event.url) {
@@ -51,6 +94,10 @@
             });
 
             calendar.render();
+
+            window.addEventListener('resize', function () {
+                calendar.setOption('headerToolbar', buildHeaderToolbar());
+            });
         });
     </script>
 </body>

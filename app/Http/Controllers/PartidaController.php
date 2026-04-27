@@ -4,9 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Partida;
 use App\Models\User;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class PartidaController extends Controller
 {
@@ -33,11 +34,11 @@ class PartidaController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'deporte' => 'required|string',
+            'deporte' => ['required', 'string', Rule::in($this->availableSports())],
             'fecha' => 'required|date',
-            'lugar' => 'required|string',
+            'lugar' => 'required|string|max:255',
             'max_jugadores' => 'required|integer|min:1',
-            'imagen' => 'nullable|image|max:2048',
+            'imagen' => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:2048',
         ]);
 
         $imagen = $request->hasFile('imagen')
@@ -51,6 +52,7 @@ class PartidaController extends Controller
             'lugar' => $validated['lugar'],
             'max_jugadores' => $validated['max_jugadores'],
             'imagen' => $imagen,
+            'image_preview_url' => $this->resolveImagePreviewUrl($imagen),
         ];
 
         $request->session()->put('pending_partida', $pendingPartida);
@@ -85,7 +87,10 @@ class PartidaController extends Controller
             'jugadores' => 'nullable|string|max:1000',
         ]);
 
-        $imagen = $this->movePendingImageToFinalLocation($pendingPartida['imagen']);
+        $imagen = $this->movePendingImageToFinalLocation(
+            $pendingPartida['imagen'],
+            $pendingPartida['deporte']
+        );
 
         $partida = $request->user()->partidasCreadas()->create([
             'titulo' => $pendingPartida['titulo'],
@@ -129,7 +134,7 @@ class PartidaController extends Controller
     public function update(Request $request, Partida $partida)
     {
         $validated = $request->validate([
-            'deporte' => 'sometimes|required|string|max:255',
+            'deporte' => ['sometimes', 'required', 'string', 'max:255', Rule::in($this->availableSports())],
             'fecha' => 'sometimes|required|date',
             'lugar' => 'sometimes|required|string|max:255',
             'max_jugadores' => 'sometimes|required|integer|min:1',
@@ -175,7 +180,7 @@ class PartidaController extends Controller
         return Str::after($files->random(), public_path() . '/');
     }
 
-    protected function movePendingImageToFinalLocation(string $imagePath): string
+    protected function movePendingImageToFinalLocation(string $imagePath, string $deporte): string
     {
         if (! str_starts_with($imagePath, 'temp/')) {
             return $imagePath;
@@ -183,11 +188,24 @@ class PartidaController extends Controller
 
         $finalPath = 'partidas/' . basename($imagePath);
 
-        if (Storage::disk('public')->exists($imagePath)) {
+        if (! Storage::disk('public')->exists($imagePath)) {
+            return $this->resolveDefaultImage($deporte);
+        }
+
+        if (! Storage::disk('public')->exists($finalPath)) {
             Storage::disk('public')->move($imagePath, $finalPath);
         }
 
         return $finalPath;
+    }
+
+    protected function resolveImagePreviewUrl(string $imagePath): string
+    {
+        if (str_starts_with($imagePath, 'images/')) {
+            return asset($imagePath);
+        }
+
+        return asset('storage/' . $imagePath);
     }
 
     protected function syncInitialPlayers(Partida $partida, User $creator, ?string $rawPlayers): void

@@ -24,16 +24,34 @@
                     @csrf
 
                     <div>
-                        <label class="mb-3 block font-semibold">Deporte</label>
-                        <div class="overflow-x-auto pb-2">
-                            <div class="flex min-w-max gap-3">
-                                @foreach($sports as $sport)
-                                    <label class="cursor-pointer">
-                                        <input type="radio" name="deporte" value="{{ $sport }}" class="peer sr-only" @checked(old('deporte') === $sport) required>
-                                        <span class="inline-flex rounded-full border border-stone-300 bg-stone-50 px-4 py-3 text-sm font-medium text-stone-700 transition peer-checked:border-stone-900 peer-checked:bg-stone-900 peer-checked:text-white hover:bg-stone-100">
-                                            {{ $sport }}
-                                        </span>
-                                    </label>
+                        <label for="deporte" class="mb-3 block font-semibold">Deporte</label>
+                        <input
+                            id="deporte"
+                            type="text"
+                            name="deporte"
+                            list="sports-list"
+                            value="{{ old('deporte') }}"
+                            placeholder="Escribe o elige un deporte"
+                            class="w-full rounded-2xl border border-stone-300 bg-stone-50 px-4 py-3 outline-none transition focus:border-stone-700"
+                            required
+                        >
+                        <datalist id="sports-list">
+                            @foreach($sports as $sport)
+                                <option value="{{ $sport }}"></option>
+                            @endforeach
+                        </datalist>
+
+                        <div class="mt-4">
+                            <p class="mb-3 text-xs uppercase tracking-[0.25em] text-stone-400">Accesos rápidos</p>
+                            <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                                @foreach(array_slice($sports, 0, 12) as $sport)
+                                    <button
+                                        type="button"
+                                        class="sport-chip rounded-2xl border border-stone-300 bg-stone-50 px-4 py-3 text-left text-sm font-medium text-stone-700 transition hover:bg-stone-100"
+                                        data-sport="{{ $sport }}"
+                                    >
+                                        {{ $sport }}
+                                    </button>
                                 @endforeach
                             </div>
                         </div>
@@ -61,10 +79,14 @@
                     <div>
                         <label class="mb-2 block font-semibold">Añade imagen</label>
                         <input type="file" name="imagen" accept="image/*"
-                            class="w-full rounded-2xl border border-stone-300 bg-stone-50 p-3">
+                            class="w-full rounded-2xl border border-stone-300 bg-stone-50 p-3"
+                            id="imagenInput">
                         <p class="mt-2 text-sm text-stone-500">
                             Si no subes imagen, se asignará una imagen aleatoria según el deporte.
                         </p>
+                        <div id="imagePreviewWrapper" class="mt-4 hidden overflow-hidden rounded-3xl border border-stone-200 bg-stone-50">
+                            <img id="imagePreview" src="" alt="Previsualización de la imagen" class="h-56 w-full object-cover">
+                        </div>
                     </div>
 
                     <button class="w-full rounded-full bg-stone-900 py-3 font-semibold text-white transition hover:bg-stone-700">
@@ -120,6 +142,38 @@
                     }
                 });
             }
+
+            document.addEventListener('DOMContentLoaded', function () {
+                const sportInput = document.getElementById('deporte');
+                const sportChips = document.querySelectorAll('.sport-chip');
+                const imageInput = document.getElementById('imagenInput');
+                const imagePreview = document.getElementById('imagePreview');
+                const imagePreviewWrapper = document.getElementById('imagePreviewWrapper');
+
+                sportChips.forEach((chip) => {
+                    chip.addEventListener('click', function () {
+                        if (!sportInput) {
+                            return;
+                        }
+
+                        sportInput.value = this.dataset.sport || '';
+                        sportInput.dispatchEvent(new Event('input'));
+                    });
+                });
+
+                imageInput?.addEventListener('change', function (event) {
+                    const file = event.target.files?.[0];
+
+                    if (!file || !imagePreview || !imagePreviewWrapper) {
+                        imagePreviewWrapper?.classList.add('hidden');
+                        return;
+                    }
+
+                    const objectUrl = URL.createObjectURL(file);
+                    imagePreview.src = objectUrl;
+                    imagePreviewWrapper.classList.remove('hidden');
+                });
+            });
         </script>
         <script src="https://maps.googleapis.com/maps/api/js?key={{ $googleMapsApiKey }}&libraries=places&callback=initAutocomplete" async defer></script>
     @endif

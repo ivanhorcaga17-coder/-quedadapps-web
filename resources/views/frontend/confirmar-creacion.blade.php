@@ -21,12 +21,15 @@
 
         <div class="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
             <section class="overflow-hidden rounded-[32px] border border-stone-200 bg-white shadow-[0_24px_80px_rgba(28,25,23,0.08)]">
-                <img src="{{ str_starts_with($pendingPartida['imagen'], 'images/') ? asset($pendingPartida['imagen']) : asset('storage/' . $pendingPartida['imagen']) }}" alt="{{ $pendingPartida['titulo'] }}" class="h-72 w-full object-cover sm:h-96">
+                <img src="{{ $pendingPartida['image_preview_url'] ?? (str_starts_with($pendingPartida['imagen'], 'images/') ? asset($pendingPartida['imagen']) : asset('storage/' . $pendingPartida['imagen'])) }}" alt="{{ $pendingPartida['titulo'] }}" class="h-72 w-full object-cover sm:h-96">
 
                 <div class="space-y-6 p-6 sm:p-8">
                     <div>
                         <p class="text-sm uppercase tracking-[0.3em] text-stone-500">{{ $pendingPartida['deporte'] }}</p>
                         <h2 class="mt-3 text-3xl font-semibold sm:text-4xl">{{ $pendingPartida['titulo'] }}</h2>
+                        <p class="mt-3 text-sm text-stone-600">
+                            La imagen seleccionada también se confirmará con la partida.
+                        </p>
                     </div>
 
                     <div class="grid gap-4 sm:grid-cols-3">

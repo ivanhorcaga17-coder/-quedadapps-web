@@ -14,12 +14,14 @@ class Asistencia extends Model
     protected $casts = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'recordatorio_partida_enviado_at' => 'datetime',
     ];
 
     protected $fillable = [
         'usuario_id',
         'partida_id',
-        'estado'   // muy importante añadirlo
+        'estado',
+        'recordatorio_partida_enviado_at',
     ];
 
     public function usuario()

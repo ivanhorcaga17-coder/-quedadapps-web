@@ -9,10 +9,10 @@
         </div>
 
         <div class="flex flex-col gap-3 sm:flex-row">
-            <a href="{{ route('descargar') }}" class="rounded-full bg-white px-6 py-3 text-center font-semibold text-stone-950 transition hover:bg-stone-200">
+            <a href="{{ route('descargar') }}" target="_blank" rel="noopener noreferrer" class="rounded-full bg-white px-6 py-3 text-center font-semibold text-stone-950 transition hover:bg-stone-200">
                 Descargar la app
             </a>
-            <a href="{{ route('descargar') }}#reviews" class="rounded-full border border-white/20 px-6 py-3 text-center font-semibold text-white transition hover:bg-white/10">
+            <a href="{{ route('descargar') }}#reviews" target="_blank" rel="noopener noreferrer" class="rounded-full border border-white/20 px-6 py-3 text-center font-semibold text-white transition hover:bg-white/10">
                 Ver valoraciones
             </a>
             <a href="{{ route('acerca') }}" class="rounded-full border border-white/20 px-6 py-3 text-center font-semibold text-white transition hover:bg-white/10">
