@@ -82,3 +82,14 @@ Route::get('/run-migrations', function () {
     Artisan::call('migrate', ['--force' => true]);
     return 'Migraciones ejecutadas correctamente';
 });
+/* RUTA TEMPORAL PARA MIGRACIONES SIN MIDDLEWARE */
+Route::get('/run-migrations', function () {
+    Artisan::call('migrate', ['--force' => true]);
+    return 'Migraciones ejecutadas correctamente';
+})->withoutMiddleware([
+    \Illuminate\Session\Middleware\StartSession::class,
+    \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+    \Illuminate\Cookie\Middleware\EncryptCookies::class,
+    \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+    \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class,
+]);
