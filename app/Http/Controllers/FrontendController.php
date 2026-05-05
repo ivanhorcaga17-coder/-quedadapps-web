@@ -42,6 +42,7 @@ class FrontendController extends Controller
                 'id' => $partida->id,
                 'title' => $partida->titulo,
                 'start' => $partida->fecha->toIso8601String(),
+                'allDay' => false,
                 'url' => route('partidas.showPage', $partida),
             ]);
 

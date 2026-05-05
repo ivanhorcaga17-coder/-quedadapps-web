@@ -11,3 +11,7 @@ Artisan::command('inspire', function () {
 Schedule::command('partidas:avisar-proximas')
     ->everyMinute()
     ->withoutOverlapping();
+
+Schedule::command('partidas:eliminar-pasadas')
+    ->hourly()
+    ->withoutOverlapping();

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Mail\QuedadappsMail;
 use App\Models\ChatMessage;
 use App\Models\Partida;
+use Throwable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
@@ -57,12 +58,16 @@ class ChatMessageController extends Controller
             ->values();
 
         foreach ($recipientEmails as $email) {
-            Mail::to($email)->send(new QuedadappsMail(
-                'Nuevo mensaje en una partida',
-                "Hay un nuevo mensaje en la partida \"{$partida->titulo}\".\n\n{$message->usuario?->name}: {$message->mensaje}",
-                route('partidas.showPage', $partida),
-                'Abrir chat'
-            ));
+            try {
+                Mail::to($email)->send(new QuedadappsMail(
+                    'Nuevo mensaje en una partida',
+                    "Hay un nuevo mensaje en la partida \"{$partida->titulo}\".\n\n{$message->usuario?->name}: {$message->mensaje}",
+                    route('partidas.showPage', $partida),
+                    'Abrir chat'
+                ));
+            } catch (Throwable $exception) {
+                report($exception);
+            }
         }
     }
 }

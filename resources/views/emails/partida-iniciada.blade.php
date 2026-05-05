@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Partida próxima</title>
+    <title>Partida iniciada</title>
     <style>
         body {
             margin: 0;
@@ -84,12 +84,12 @@
     <div class="card">
         <div class="header">
             <small>QuedadApps</small>
-            <strong>Tu partida empieza en {{ $minutesBefore }} minutos o menos</strong>
+            <strong>La partida ya ha empezado</strong>
         </div>
 
         <div class="content">
             <h1>{{ $partida->deporte }}</h1>
-            <p>Hola {{ $usuario->name }}, te recordamos que una de tus partidas está a punto de empezar.</p>
+            <p>Hola {{ $usuario->name }}, te avisamos de que la actividad ya ha comenzado.</p>
 
             <div class="details">
                 <p><strong>Deporte:</strong> {{ $partida->deporte }}</p>

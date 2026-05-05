@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Partida próxima</title>
+    <title>Partida eliminada</title>
     <style>
         body {
             margin: 0;
@@ -62,17 +62,6 @@
             color: #111111;
         }
 
-        .button {
-            display: inline-block;
-            margin-top: 8px;
-            padding: 14px 22px;
-            border-radius: 999px;
-            background: #111111;
-            color: #ffffff !important;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
         .footer {
             padding: 20px 32px 28px;
             color: #78716c;
@@ -84,21 +73,21 @@
     <div class="card">
         <div class="header">
             <small>QuedadApps</small>
-            <strong>Tu partida empieza en {{ $minutesBefore }} minutos o menos</strong>
+            <strong>La partida ha sido eliminada</strong>
         </div>
 
         <div class="content">
             <h1>{{ $partida->deporte }}</h1>
-            <p>Hola {{ $usuario->name }}, te recordamos que una de tus partidas está a punto de empezar.</p>
+            <p>Hola {{ $usuario->name }}, la partida a la que estabas apuntado se ha eliminado automáticamente.</p>
 
             <div class="details">
                 <p><strong>Deporte:</strong> {{ $partida->deporte }}</p>
                 <p><strong>Fecha:</strong> {{ $partida->fecha->format('d/m/Y') }}</p>
                 <p><strong>Hora:</strong> {{ $partida->fecha->format('H:i') }}</p>
-                <p><strong>Ubicación:</strong> {{ $partida->lugar }}</p>
+                <p><strong>Motivo:</strong> {{ $motivo }}</p>
             </div>
 
-            <a href="{{ route('partidas.showPage', $partida) }}" class="button">Ver partida</a>
+            <p>Puedes buscar o crear una nueva partida cuando quieras desde QuedadApps.</p>
         </div>
 
         <div class="footer">

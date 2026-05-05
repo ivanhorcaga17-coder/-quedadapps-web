@@ -15,6 +15,7 @@ class Asistencia extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'recordatorio_partida_enviado_at' => 'datetime',
+        'recordatorio_inicio_enviado_at' => 'datetime',
     ];
 
     protected $fillable = [
@@ -22,6 +23,7 @@ class Asistencia extends Model
         'partida_id',
         'estado',
         'recordatorio_partida_enviado_at',
+        'recordatorio_inicio_enviado_at',
     ];
 
     public function usuario()

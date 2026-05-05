@@ -7,6 +7,63 @@
     <link rel="icon" type="image/png" href="{{ asset('frontend/img/QuedadAppsWeb.png') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css">
+    <style>
+        .fc {
+            --fc-border-color: #e7e5e4;
+            --fc-page-bg-color: #ffffff;
+            --fc-neutral-bg-color: #fafaf9;
+            --fc-list-event-hover-bg-color: #f5f5f4;
+            --fc-event-bg-color: #111827;
+            --fc-event-border-color: #111827;
+            --fc-event-text-color: #ffffff;
+            --fc-now-indicator-color: #dc2626;
+        }
+
+        .fc .fc-toolbar-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1c1917;
+        }
+
+        .fc .fc-button {
+            border-radius: 999px;
+            border: 1px solid #d6d3d1;
+            background: #ffffff;
+            color: #1c1917;
+            box-shadow: none;
+            padding: 0.55rem 0.9rem;
+        }
+
+        .fc .fc-button:hover,
+        .fc .fc-button:focus,
+        .fc .fc-button.fc-button-active {
+            background: #1c1917;
+            border-color: #1c1917;
+            color: #ffffff;
+        }
+
+        .fc .fc-timegrid-slot {
+            height: 3.5rem;
+        }
+
+        .fc .fc-timegrid-axis-cushion,
+        .fc .fc-timegrid-slot-label-cushion,
+        .fc .fc-col-header-cell-cushion {
+            color: #44403c;
+            font-size: 0.85rem;
+        }
+
+        .fc .fc-timegrid-event {
+            border-radius: 16px;
+            padding: 0.2rem;
+        }
+
+        .fc .fc-event-time,
+        .fc .fc-event-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+    </style>
 </head>
 <body class="min-h-screen bg-stone-50 text-stone-900">
     @include('partials.header')
@@ -31,8 +88,8 @@
                     <p class="mt-1">Ideal para localizar la actividad exacta de los próximos días.</p>
                 </div>
                 <div class="rounded-2xl border border-stone-200 bg-white px-4 py-3">
-                    <span class="font-semibold text-stone-900">Tema QuedadApps</span>
-                    <p class="mt-1">Blanco, negro y grises para encajar con el resto de la web.</p>
+                    <span class="font-semibold text-stone-900">Vista diaria</span>
+                    <p class="mt-1">Horario completo de 00:00 a 23:59 para ubicar cada partida en su franja real.</p>
                 </div>
             </div>
             <div id="calendar" class="min-h-[720px]"></div>
@@ -62,7 +119,32 @@
             calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
                 locale: 'es',
+                timeZone: 'Europe/Madrid',
                 height: 'auto',
+                expandRows: true,
+                stickyHeaderDates: true,
+                nowIndicator: true,
+                slotMinTime: '00:00:00',
+                slotMaxTime: '24:00:00',
+                slotDuration: '01:00:00',
+                snapDuration: '00:15:00',
+                defaultTimedEventDuration: '01:00:00',
+                allDaySlot: false,
+                eventTimeFormat: {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false,
+                },
+                slotLabelFormat: {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false,
+                },
+                dayHeaderFormat: {
+                    weekday: 'short',
+                    day: '2-digit',
+                    month: '2-digit',
+                },
                 buttonText: {
                     today: 'hoy',
                     month: 'mes',
@@ -85,6 +167,14 @@
                 },
                 headerToolbar: buildHeaderToolbar(),
                 events: @json($calendarEvents),
+                views: {
+                    timeGridDay: {
+                        dayMaxEventRows: false,
+                    },
+                    timeGridWeek: {
+                        dayMaxEventRows: false,
+                    },
+                },
                 eventClick(info) {
                     if (info.event.url) {
                         info.jsEvent.preventDefault();
