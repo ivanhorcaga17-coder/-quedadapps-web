@@ -7,7 +7,11 @@
     root * /app/public
     encode zstd gzip
 
-    php_server
+    php_server {
+        root /app/public
+        index index.php
+    }
 
+    try_files {path} {path}/ /index.php?{query}
     file_server
 }
