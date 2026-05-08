@@ -1,39 +1,5 @@
 [build]
 builder = "NIXPACKS"
 
-[variables]
-NODE_VERSION = "22"
-
-[phases.setup]
-nixPkgs = [
-  "php",
-  "php82Extensions.pdo_mysql",
-  "php82Extensions.mbstring",
-  "php82Extensions.curl",
-  "php82Extensions.fileinfo",
-  "php82Extensions.openssl",
-  "php82Extensions.tokenizer",
-  "php82Extensions.xml",
-  "php82Extensions.dom",
-  "php82Extensions.session",
-  "nodejs_22",
-  "curl",
-  "unzip"
-]
-
-[phases.install]
-cmds = [
-  "curl -L https://github.com/dunglas/frankenphp/releases/latest/download/frankenphp-linux-x86_64.zip -o frankenphp.zip",
-  "unzip frankenphp.zip -d /usr/local/bin",
-  "chmod +x /usr/local/bin/frankenphp"
-]
-
-[phases.build]
-cmds = [
-  "npm install",
-  "npm run build",
-  "composer install --no-dev --optimize-autoloader"
-]
-
 [start]
 cmd = "frankenphp run --config /Caddyfile"
