@@ -1,0 +1,18 @@
+[build]
+builder = "NIXPACKS"
+
+[deploy]
+start = "frankenphp run --config /Caddyfile"
+
+[phases.setup]
+nixPkgs = ["php", "php82Extensions.pdo_mysql", "php82Extensions.mbstring", "php82Extensions.curl", "php82Extensions.fileinfo", "php82Extensions.openssl", "php82Extensions.tokenizer", "php82Extensions.xml", "php82Extensions.dom", "php82Extensions.session"]
+
+[phases.build]
+cmds = [
+  "npm install",
+  "npm run build",
+  "composer install --no-dev --optimize-autoloader"
+]
+
+[phases.start]
+cmd = "frankenphp run --config /Caddyfile"
