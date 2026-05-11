@@ -11,15 +11,13 @@ nixPkgs = [
   "php82Extensions.dom",
   "php82Extensions.session",
   "nodejs_22",
-  "curl",
-  "unzip"
+  "curl"
 ]
 
 [phases.install]
 cmds = [
   "mkdir -p /app/bin",
-  "curl -L https://github.com/dunglas/frankenphp/releases/latest/download/frankenphp-linux-x86_64.zip -o frankenphp.zip",
-  "unzip frankenphp.zip -d /app/bin",
+  "curl -L https://github.com/dunglas/frankenphp/releases/latest/download/frankenphp-linux-x86_64 -o /app/bin/frankenphp",
   "chmod +x /app/bin/frankenphp"
 ]
 
