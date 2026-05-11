@@ -24,7 +24,10 @@ cmds = [
 
 [phases.build]
 cmds = [
-  "npm install",
+  "npm ci",
   "npm run build",
   "composer install --no-dev --optimize-autoloader"
 ]
+
+[phases.start]
+cmd = "/app/bin/frankenphp run --config /app/Caddyfile"
