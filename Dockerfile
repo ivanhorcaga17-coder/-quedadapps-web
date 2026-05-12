@@ -26,7 +26,9 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 RUN composer install --no-dev --optimize-autoloader
 
 # Instalar dependencias de Node y compilar Vite
+RUN rm -rf node_modules package-lock.json
 RUN npm install && npm run build
+
 
 
 # Instalar FrankenPHP
