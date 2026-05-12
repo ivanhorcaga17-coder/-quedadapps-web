@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y \
     libzip-dev \
     && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
 
-# Instalar Node.js 22
+# Instalar Node.js 20
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs
 
@@ -26,12 +26,12 @@ COPY . .
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 RUN composer install --no-dev --optimize-autoloader
 
+# DEBUG: Ver qué archivos existen en /app
 RUN ls -R /app
+
+# Instalar dependencias de Node y compilar Vite
 RUN rm -rf node_modules package-lock.json
 RUN npm install && npm run build
-
-
-
 
 # Instalar FrankenPHP
 RUN mkdir -p /app/bin && \
@@ -40,6 +40,7 @@ RUN mkdir -p /app/bin && \
 
 EXPOSE 8080
 
+# DEBUG: Ver qué hay en public después del build
 RUN ls -R /app/public
 
 CMD ["/app/bin/frankenphp", "run", "--config", "/app/Caddyfile"]
