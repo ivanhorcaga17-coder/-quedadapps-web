@@ -25,9 +25,10 @@ COPY . .
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 RUN composer install --no-dev --optimize-autoloader
 
-# Instalar dependencias de Node y compilar Vite
+RUN ls -R /app
 RUN rm -rf node_modules package-lock.json
 RUN npm install && npm run build
+
 
 
 
