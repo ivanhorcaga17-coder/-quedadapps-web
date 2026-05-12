@@ -21,6 +21,7 @@ COPY . .
 
 RUN composer install --no-dev --optimize-autoloader
 
+
 RUN rm -rf node_modules package-lock.json
 RUN npm install
 RUN npm run build
