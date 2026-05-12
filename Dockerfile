@@ -1,4 +1,4 @@
-FROM dunglas/frankenphp:1.2-php8.2
+FROM dunglas/frankenphp:1.2-php8.2-builder
 
 # Instalar dependencias del sistema
 RUN apt-get update && apt-get install -y \
@@ -28,7 +28,7 @@ RUN rm -rf node_modules package-lock.json
 RUN npm install
 RUN npm run build
 
-# Asegurar permisos correctos
+# Permisos correctos
 RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache
 
 EXPOSE 8080
