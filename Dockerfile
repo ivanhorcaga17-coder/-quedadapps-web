@@ -19,19 +19,17 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
 
 WORKDIR /app
 
-# Copiar proyecto
+# Copiar proyecto COMPLETO
 COPY . .
 
 # Instalar dependencias de PHP
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 RUN composer install --no-dev --optimize-autoloader
 
-# DEBUG: Ver qué archivos existen en /app
-RUN ls -R /app
-
-# Instalar dependencias de Node y compilar Vite
+# Instalar dependencias de Node y compilar Vite (AL FINAL)
 RUN rm -rf node_modules package-lock.json
-RUN npm install && npm run build
+RUN npm install
+RUN npm run build
 
 # Instalar FrankenPHP
 RUN mkdir -p /app/bin && \
@@ -40,7 +38,7 @@ RUN mkdir -p /app/bin && \
 
 EXPOSE 8080
 
-# DEBUG: Ver qué hay en public después del build
+# Verificar que el build existe
 RUN ls -R /app/public
 
 CMD ["/app/bin/frankenphp", "run", "--config", "/app/Caddyfile"]
