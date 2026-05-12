@@ -1,4 +1,4 @@
-FROM dunglas/frankenphp:1.2-php8.2-builder
+FROM dunglas/frankenphp:1.2-php8.2
 
 # Instalar dependencias del sistema
 RUN apt-get update && apt-get install -y \
@@ -10,6 +10,9 @@ RUN apt-get update && apt-get install -y \
     libonig-dev \
     libxml2-dev \
     libzip-dev
+
+# Instalar Composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 # Instalar Node.js 20
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
