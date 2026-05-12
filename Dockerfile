@@ -38,5 +38,4 @@ EXPOSE 8080
 
 RUN ls -R /app/public
 
-
 CMD ["/app/bin/frankenphp", "run", "--config", "/app/Caddyfile"]
