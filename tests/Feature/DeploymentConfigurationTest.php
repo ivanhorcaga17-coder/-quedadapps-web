@@ -10,17 +10,14 @@ class DeploymentConfigurationTest extends TestCase
     {
         $expectedCaddyfile = <<<'CADDY'
 {
-    auto_https off
+	auto_https off
 }
 
-:8080 {
-    root * /app/public
-    php_server
-    encode gzip zstd
-    file_server
+:{$PORT} {
+	root * /app/public
+	encode gzip zstd
+	php_server
 }
-
-# force refresh
 CADDY;
 
         $this->assertSame($expectedCaddyfile."\n", file_get_contents(base_path('Caddyfile')));

@@ -1,12 +1,9 @@
 {
-    auto_https off
+	auto_https off
 }
 
-:8080 {
-    root * /app/public
-    php_server
-    encode gzip zstd
-    file_server
+:{$PORT} {
+	root * /app/public
+	encode gzip zstd
+	php_server
 }
-
-# force refresh
