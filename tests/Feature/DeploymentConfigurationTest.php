@@ -13,10 +13,15 @@ class DeploymentConfigurationTest extends TestCase
 	auto_https off
 }
 
-http://0.0.0.0:{$PORT:8080} {
+:{$PORT:8080} {
+	bind 0.0.0.0
 	root * /app/public
 	encode gzip zstd
 	php_server
+	log {
+		output stdout
+		format console
+	}
 }
 CADDY;
 
