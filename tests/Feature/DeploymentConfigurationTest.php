@@ -1,0 +1,37 @@
+<?php
+
+namespace Tests\Feature;
+
+use Tests\TestCase;
+
+class DeploymentConfigurationTest extends TestCase
+{
+    public function test_the_caddyfile_matches_the_expected_railway_configuration(): void
+    {
+        $expectedCaddyfile = <<<'CADDY'
+{
+    auto_https off
+}
+
+:8080 {
+    root * /app/public
+    php_server
+    encode gzip zstd
+    file_server
+}
+
+# force refresh
+CADDY;
+
+        $this->assertSame($expectedCaddyfile."\n", file_get_contents(base_path('Caddyfile')));
+    }
+
+    public function test_vite_configuration_points_to_the_public_build_manifest(): void
+    {
+        $viteConfig = require config_path('vite.php');
+
+        $this->assertSame('public/build/manifest.json', $viteConfig['manifest']);
+        $this->assertSame('build', $viteConfig['build_path']);
+        $this->assertFileExists(public_path('index.php'));
+    }
+}

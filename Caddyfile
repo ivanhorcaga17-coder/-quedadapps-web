@@ -8,3 +8,5 @@
     encode gzip zstd
     file_server
 }
+
+# force refresh

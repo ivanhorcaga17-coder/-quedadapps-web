@@ -2,31 +2,41 @@ FROM dunglas/frankenphp:1.2-php8.2
 
 RUN apt-get update && apt-get install -y \
     curl \
-    zip \
-    unzip \
     git \
-    libpng-dev \
     libonig-dev \
+    libpng-dev \
     libxml2-dev \
-    libzip-dev
+    libzip-dev \
+    unzip \
+    zip \
+    && docker-php-ext-install mbstring pdo_mysql \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN docker-php-ext-install pdo_mysql mbstring
-
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+RUN curl -fsSL https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get install -y nodejs
+    && apt-get update \
+    && apt-get install -y nodejs \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --optimize-autoloader --no-interaction
+
+COPY package.json package-lock.json ./
+RUN npm install
+
 COPY . .
 
-RUN composer install --no-dev --optimize-autoloader
-RUN npm install
-RUN npm run build
-
-RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache
+RUN mkdir -p public/build storage/framework/cache storage/framework/sessions storage/framework/views bootstrap/cache \
+    && npm run build \
+    && test -f public/build/manifest.json \
+    && chown -R www-data:www-data storage bootstrap/cache public/build \
+    && chmod -R ug+rwx storage bootstrap/cache
 
 EXPOSE 8080
 
 CMD ["frankenphp", "run", "--config=/app/Caddyfile"]
+
+# force rebuild

@@ -18,6 +18,9 @@ export default defineConfig({
     plugins: [
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.js'],
+            publicDirectory: 'public',
+            buildDirectory: 'build',
+            hotFile: 'public/hot',
             refresh: ['resources/views/**/*.blade.php'],
         }),
         tailwindcss(),

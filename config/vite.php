@@ -5,7 +5,7 @@ return [
 
     'hot_file' => 'public/hot',
 
-    'build_path' => 'public/build',
+    'build_path' => 'build',
 
     'dev_server' => [
         'url' => env('VITE_DEV_SERVER_URL'),

@@ -2,8 +2,9 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Vite;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -21,6 +22,21 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Carbon::setLocale('es');
+
+        $manifestPath = config('vite.manifest', 'public/build/manifest.json');
+        $buildPath = dirname($manifestPath);
+        $publicBuildPath = (string) config(
+            'vite.build_path',
+            str_starts_with($buildPath, 'public/') ? substr($buildPath, 7) : $buildPath
+        );
+        $hotFile = config('vite.hot_file', 'public/hot');
+        $publicHotFile = str_starts_with($hotFile, 'public/')
+            ? public_path(substr($hotFile, 7))
+            : public_path($hotFile);
+
+        Vite::useBuildDirectory($publicBuildPath);
+        Vite::useManifestFilename(basename($manifestPath));
+        Vite::useHotFile($publicHotFile);
 
         view()->share('sports', [
             'Fútbol',
