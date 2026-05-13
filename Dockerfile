@@ -29,7 +29,7 @@ COPY package.json package-lock.json ./
 
 COPY . .
 
-RUN rm -f bootstrap/cache/*.php \
+RUN rm -f bootstrap/cache/*.php public/hot \
     && composer install --no-dev --optimize-autoloader --no-interaction \
     && npm install \
     && mkdir -p public/build storage/framework/cache storage/framework/sessions storage/framework/views bootstrap/cache \
