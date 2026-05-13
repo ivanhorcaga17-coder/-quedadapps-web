@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'manifest' => 'public/build/.vite/manifest.json',
+    'manifest' => 'public/build/manifest.json',
 
     'hot_file' => 'public/hot',
 

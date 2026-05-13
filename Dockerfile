@@ -10,6 +10,8 @@ RUN apt-get update && apt-get install -y \
     libxml2-dev \
     libzip-dev
 
+RUN docker-php-ext-install pdo_mysql mbstring
+
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
@@ -20,9 +22,6 @@ WORKDIR /app
 COPY . .
 
 RUN composer install --no-dev --optimize-autoloader
-
-
-RUN rm -rf node_modules package-lock.json
 RUN npm install
 RUN npm run build
 
