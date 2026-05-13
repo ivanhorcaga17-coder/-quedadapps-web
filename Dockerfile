@@ -1,5 +1,7 @@
 FROM dunglas/frankenphp:1.2-php8.2
 
+ENV COMPOSER_ALLOW_SUPERUSER=1
+
 RUN apt-get update && apt-get install -y \
     curl \
     git \
@@ -22,14 +24,14 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
 WORKDIR /app
 
 COPY composer.json composer.lock ./
-RUN composer install --no-dev --optimize-autoloader --no-interaction
 
 COPY package.json package-lock.json ./
-RUN npm install
 
 COPY . .
 
-RUN mkdir -p public/build storage/framework/cache storage/framework/sessions storage/framework/views bootstrap/cache \
+RUN composer install --no-dev --optimize-autoloader --no-interaction \
+    && npm install \
+    && mkdir -p public/build storage/framework/cache storage/framework/sessions storage/framework/views bootstrap/cache \
     && npm run build \
     && test -f public/build/manifest.json \
     && chown -R www-data:www-data storage bootstrap/cache public/build \
