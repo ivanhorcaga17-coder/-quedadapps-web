@@ -25,7 +25,7 @@ class AppServiceProvider extends ServiceProvider
         Carbon::setLocale('es');
 
         if (! app()->runningInConsole()) {
-            URL::forceRootUrl(request()->getSchemeAndHttpHost());
+           // URL::forceRootUrl(request()->getSchemeAndHttpHost());
         }
 
         $manifestPath = config('vite.manifest', 'public/build/manifest.json');
