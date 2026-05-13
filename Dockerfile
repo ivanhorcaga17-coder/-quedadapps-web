@@ -31,7 +31,6 @@ COPY . .
 
 RUN rm -f bootstrap/cache/*.php \
     && composer install --no-dev --optimize-autoloader --no-interaction \
-    && php artisan optimize:clear --no-interaction \
     && npm install \
     && mkdir -p public/build storage/framework/cache storage/framework/sessions storage/framework/views bootstrap/cache \
     && npm run build \
