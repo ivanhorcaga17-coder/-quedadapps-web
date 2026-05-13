@@ -6,13 +6,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const tablaAsistencias = document.getElementById('tablaAsistencias');
     const formAsistencia = document.getElementById('formAsistencia');
 
+    if (!tablaUsuarios && !tablaPartidas && !tablaAsistencias && !formAsistencia) {
+        return;
+    }
+
+    async function fetchJson(url, options = {}) {
+        const response = await fetch(url, options);
+
+        if (!response.ok) {
+            throw new Error(`Request failed with status ${response.status}`);
+        }
+
+        return response.json();
+    }
+
     async function cargarUsuarios() {
         if (!tablaUsuarios) {
             return;
         }
 
-        const res = await fetch(`${API}/usuarios`);
-        const data = await res.json();
+        const data = await fetchJson(`${API}/usuarios`);
 
         tablaUsuarios.innerHTML = `
             <tr><th>ID</th><th>Nombre</th><th>Email</th></tr>
@@ -31,8 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const res = await fetch(`${API}/partidas`);
-        const data = await res.json();
+        const data = await fetchJson(`${API}/partidas`);
 
         tablaPartidas.innerHTML = `
             <tr><th>ID</th><th>Título</th><th>Fecha</th><th>Lugar</th></tr>
@@ -52,8 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const res = await fetch(`${API}/asistencia`);
-        const data = await res.json();
+        const data = await fetchJson(`${API}/asistencia`);
 
         tablaAsistencias.innerHTML = `
             <tr><th>ID</th><th>Usuario</th><th>Partida</th><th>Estado</th></tr>
@@ -78,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 estado: document.getElementById('estado')?.value,
             };
 
-            await fetch(`${API}/asistencia`, {
+            await fetchJson(`${API}/asistencia`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body),
@@ -88,7 +99,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    cargarUsuarios();
-    cargarPartidas();
-    cargarAsistencias();
+    Promise.allSettled([
+        cargarUsuarios(),
+        cargarPartidas(),
+        cargarAsistencias(),
+    ]).catch(() => {
+        return;
+    });
 });
