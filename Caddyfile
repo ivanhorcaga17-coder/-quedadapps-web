@@ -1,9 +1,9 @@
 {
-    auto_https off
+	auto_https off
 }
 
-:8080 {
-    root * /app/public
-    encode gzip zstd
-    php_server
+:{$PORT:8080} {
+	root * /app/public
+	encode gzip zstd
+	php_server
 }
