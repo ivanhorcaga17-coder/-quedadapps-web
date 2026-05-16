@@ -54,4 +54,20 @@ CADDY;
             ->assertSee('https://quedadapps.example.com/login', false)
             ->assertDontSee('http://internal-container:8080', false);
     }
+
+    public function test_the_docker_build_uses_php_84_and_recreates_the_storage_link(): void
+    {
+        $dockerfile = file_get_contents(base_path('Dockerfile'));
+
+        $this->assertStringContainsString('FROM dunglas/frankenphp:1.2-php8.4', $dockerfile);
+        $this->assertStringContainsString('rm -rf public/storage', $dockerfile);
+        $this->assertStringContainsString('php artisan storage:link --no-interaction', $dockerfile);
+    }
+
+    public function test_the_dockerignore_excludes_the_local_env_file(): void
+    {
+        $dockerignore = file_get_contents(base_path('.dockerignore'));
+
+        $this->assertStringContainsString('.env', $dockerignore);
+    }
 }

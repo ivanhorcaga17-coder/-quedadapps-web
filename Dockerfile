@@ -1,4 +1,4 @@
-FROM dunglas/frankenphp:1.2-php8.2
+FROM dunglas/frankenphp:1.2-php8.4
 
 ENV COMPOSER_ALLOW_SUPERUSER=1
 
@@ -30,12 +30,14 @@ COPY package.json package-lock.json ./
 COPY . .
 
 RUN rm -f bootstrap/cache/*.php public/hot \
+    && rm -rf public/storage \
     && composer install --no-dev --optimize-autoloader --no-interaction \
     && npm install \
     && mkdir -p public/build storage/framework/cache storage/framework/sessions storage/framework/views bootstrap/cache \
+    && php artisan storage:link --no-interaction \
     && npm run build \
     && test -f public/build/manifest.json \
-    && chown -R www-data:www-data storage bootstrap/cache public/build \
+    && chown -R www-data:www-data storage bootstrap/cache public/build public/storage \
     && chmod -R ug+rwx storage bootstrap/cache
 
 EXPOSE 8080
