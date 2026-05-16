@@ -11,6 +11,9 @@ class DeploymentConfigurationTest extends TestCase
         $expectedCaddyfile = <<<'CADDY'
 {
 	auto_https off
+	servers {
+		trusted_proxies static private_ranges
+	}
 }
 
 :{$PORT:8080} {
