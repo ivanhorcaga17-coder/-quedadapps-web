@@ -1,21 +1,23 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Artisan;
-use App\Http\Controllers\ReviewController;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\ForgotPasswordController;
-use App\Http\Controllers\ResetPasswordController;
-use App\Http\Controllers\PerfilController;
-use App\Http\Controllers\DescargarController;
-use App\Http\Controllers\PartidaController;
-use App\Http\Controllers\FrontendController;
-use App\Http\Controllers\AsistenciaController;
-use App\Http\Controllers\ChatMessageController;
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\AsistenciaController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ChatMessageController;
+use App\Http\Controllers\DescargarController;
+use App\Http\Controllers\ForgotPasswordController;
+use App\Http\Controllers\FrontendController;
+use App\Http\Controllers\PartidaController;
+use App\Http\Controllers\PerfilController;
+use App\Http\Controllers\ResetPasswordController;
+use App\Http\Controllers\ReviewController;
+use App\Support\DeploymentSchemaRepair;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Route;
 
 /* PÁGINAS PRINCIPALES */
-Route::get('/', fn() => view('frontend.index'))->name('index');
+Route::get('/', fn () => view('frontend.index'))->name('index');
 Route::get('/buscar-partidas', [FrontendController::class, 'buscar'])->name('buscar');
 Route::get('/calendario', [FrontendController::class, 'calendario'])->name('calendario');
 Route::get('/acerca-de', [FrontendController::class, 'acerca'])->name('acerca');
@@ -35,8 +37,8 @@ Route::get('/partida/{partida}/confirmar', [PartidaController::class, 'confirmar
 
 /* AUTH */
 Route::middleware('guest')->group(function () {
-    Route::get('/login', fn() => view('frontend.login'))->name('login');
-    Route::get('/register', fn() => view('frontend.registro'))->name('registro');
+    Route::get('/login', fn () => view('frontend.login'))->name('login');
+    Route::get('/register', fn () => view('frontend.registro'))->name('registro');
     Route::post('/registro', [AuthController::class, 'register'])->name('registro.post');
     Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 });
@@ -79,6 +81,28 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'isAdmin'])->group(f
 });
 
 Route::get('/run-migrations', function () {
-    Artisan::call('migrate', ['--force' => true]);
-    return 'Migraciones ejecutadas correctamente';
+    try {
+        Artisan::call('migrate', ['--force' => true]);
+
+        return 'Migraciones ejecutadas correctamente';
+    } catch (\Throwable $exception) {
+        Log::error('Migration route failed, attempting schema repair.', [
+            'message' => $exception->getMessage(),
+        ]);
+
+        try {
+            $steps = app(DeploymentSchemaRepair::class)->repair();
+
+            return 'Reparacion de esquema completada: '.implode(', ', $steps);
+        } catch (\Throwable $repairException) {
+            Log::error('Schema repair failed.', [
+                'message' => $repairException->getMessage(),
+            ]);
+
+            return response(
+                'Error al reparar la base de datos: '.$repairException->getMessage(),
+                500
+            );
+        }
+    }
 });
