@@ -1,4 +1,4 @@
-FROM dunglas/frankenphp:1.2-php8.4
+FROM dunglas/frankenphp:php8.4-bookworm
 
 ENV COMPOSER_ALLOW_SUPERUSER=1
 

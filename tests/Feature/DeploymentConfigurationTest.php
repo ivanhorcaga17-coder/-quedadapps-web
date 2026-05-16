@@ -59,7 +59,7 @@ CADDY;
     {
         $dockerfile = file_get_contents(base_path('Dockerfile'));
 
-        $this->assertStringContainsString('FROM dunglas/frankenphp:1.2-php8.4', $dockerfile);
+        $this->assertStringContainsString('FROM dunglas/frankenphp:php8.4-bookworm', $dockerfile);
         $this->assertStringContainsString('rm -rf public/storage', $dockerfile);
         $this->assertStringContainsString('php artisan storage:link --no-interaction', $dockerfile);
     }
