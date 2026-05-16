@@ -35,6 +35,7 @@ RUN rm -f bootstrap/cache/*.php public/hot \
     && npm install \
     && mkdir -p public/build storage/framework/cache storage/framework/sessions storage/framework/views bootstrap/cache \
     && php artisan storage:link --no-interaction \
+    && chmod +x bin/start-container.sh \
     && npm run build \
     && test -f public/build/manifest.json \
     && chown -R www-data:www-data storage bootstrap/cache public/build public/storage \
@@ -42,6 +43,6 @@ RUN rm -f bootstrap/cache/*.php public/hot \
 
 EXPOSE 8080
 
-CMD ["frankenphp", "run", "--config=/app/Caddyfile"]
+CMD ["./bin/start-container.sh"]
 
 # force rebuild

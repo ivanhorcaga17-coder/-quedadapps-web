@@ -62,6 +62,7 @@ CADDY;
         $this->assertStringContainsString('FROM dunglas/frankenphp:php8.4-bookworm', $dockerfile);
         $this->assertStringContainsString('rm -rf public/storage', $dockerfile);
         $this->assertStringContainsString('php artisan storage:link --no-interaction', $dockerfile);
+        $this->assertStringContainsString('CMD ["./bin/start-container.sh"]', $dockerfile);
     }
 
     public function test_the_dockerignore_excludes_the_local_env_file(): void
@@ -69,5 +70,15 @@ CADDY;
         $dockerignore = file_get_contents(base_path('.dockerignore'));
 
         $this->assertStringContainsString('.env', $dockerignore);
+    }
+
+    public function test_the_container_start_script_runs_migrations_and_warms_runtime_caches(): void
+    {
+        $startScript = file_get_contents(base_path('bin/start-container.sh'));
+
+        $this->assertStringContainsString('php artisan migrate --force --no-interaction', $startScript);
+        $this->assertStringContainsString('php artisan config:cache --no-interaction', $startScript);
+        $this->assertStringContainsString('php artisan view:cache --no-interaction', $startScript);
+        $this->assertStringContainsString('exec frankenphp run --config=/app/Caddyfile', $startScript);
     }
 }
