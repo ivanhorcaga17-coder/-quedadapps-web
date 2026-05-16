@@ -9,6 +9,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (! Schema::hasTable('asistencias')) {
+            return;
+        }
+
         DB::table('asistencias')
             ->select('usuario_id', 'partida_id', DB::raw('MIN(id) as keep_id'))
             ->groupBy('usuario_id', 'partida_id')
@@ -22,15 +26,25 @@ return new class extends Migration
                     ->delete();
             });
 
-        Schema::table('asistencias', function (Blueprint $table) {
-            $table->unique(['usuario_id', 'partida_id'], 'asistencias_usuario_partida_unique');
-        });
+        try {
+            Schema::table('asistencias', function (Blueprint $table) {
+                $table->unique(['usuario_id', 'partida_id'], 'asistencias_usuario_partida_unique');
+            });
+        } catch (\Throwable $exception) {
+        }
     }
 
     public function down(): void
     {
+        if (! Schema::hasTable('asistencias')) {
+            return;
+        }
+
         Schema::table('asistencias', function (Blueprint $table) {
-            $table->dropUnique('asistencias_usuario_partida_unique');
+            try {
+                $table->dropUnique('asistencias_usuario_partida_unique');
+            } catch (\Throwable $exception) {
+            }
         });
     }
 };

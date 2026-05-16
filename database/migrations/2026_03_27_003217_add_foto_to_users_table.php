@@ -6,11 +6,12 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
+        if (! Schema::hasTable('usuarios') || Schema::hasColumn('usuarios', 'foto')) {
+            return;
+        }
+
         Schema::table('usuarios', function (Blueprint $table) {
             $table->string('foto')->nullable()->after('role');
         });
@@ -18,9 +19,12 @@ return new class extends Migration
 
     public function down(): void
     {
+        if (! Schema::hasTable('usuarios') || ! Schema::hasColumn('usuarios', 'foto')) {
+            return;
+        }
+
         Schema::table('usuarios', function (Blueprint $table) {
             $table->dropColumn('foto');
         });
     }
-
 };
