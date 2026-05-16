@@ -36,4 +36,19 @@ CADDY;
         $this->assertSame('build', $viteConfig['build_path']);
         $this->assertFileExists(public_path('index.php'));
     }
+
+    public function test_the_homepage_respects_forwarded_proxy_headers(): void
+    {
+        $response = $this->withServerVariables([
+            'HTTP_HOST' => 'internal-container:8080',
+            'HTTP_X_FORWARDED_HOST' => 'quedadapps.example.com',
+            'HTTP_X_FORWARDED_PROTO' => 'https',
+            'HTTP_X_FORWARDED_PORT' => '443',
+        ])->get('/');
+
+        $response
+            ->assertOk()
+            ->assertSee('https://quedadapps.example.com/login', false)
+            ->assertDontSee('http://internal-container:8080', false);
+    }
 }

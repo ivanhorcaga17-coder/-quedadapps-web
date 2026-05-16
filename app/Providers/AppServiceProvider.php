@@ -3,7 +3,6 @@
 namespace App\Providers;
 
 use Carbon\Carbon;
-use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 
@@ -23,10 +22,6 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Carbon::setLocale('es');
-
-        if (! app()->runningInConsole()) {
-            URL::forceRootUrl(request()->getSchemeAndHttpHost());
-        }
 
         $manifestPath = config('vite.manifest', 'public/build/manifest.json');
         $buildPath = dirname($manifestPath);
