@@ -4,25 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Models\Partida;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Throwable;
 
 class FrontendController extends Controller
 {
     public function buscar(Request $request)
     {
         $sports = $this->availableSports();
-        $joinedPartidaIds = $request->user()
-            ? $request->user()->asistencias()->pluck('partida_id')->all()
-            : [];
-
-        $partidas = Partida::query()
-            ->with(['creador', 'asistencias.usuario'])
-            ->withCount('asistencias')
-            ->when($request->filled('deporte'), fn ($query) => $query->where('deporte', $request->string('deporte')))
-            ->when($request->filled('lugar'), fn ($query) => $query->where('lugar', 'like', '%' . $request->string('lugar') . '%'))
-            ->when($request->filled('fecha'), fn ($query) => $query->whereDate('fecha', $request->input('fecha')))
-            ->orderBy('fecha')
-            ->paginate(9)
-            ->withQueryString();
+        $joinedPartidaIds = $this->resolveJoinedPartidaIds($request);
+        $partidas = $this->resolveBuscarPartidas($request);
 
         return view('frontend.buscar', [
             'partidas' => $partidas,
@@ -35,16 +26,20 @@ class FrontendController extends Controller
 
     public function calendario()
     {
-        $partidas = Partida::query()
-            ->orderBy('fecha')
-            ->get()
-            ->map(fn (Partida $partida) => [
-                'id' => $partida->id,
-                'title' => $partida->titulo,
-                'start' => $partida->fecha->toIso8601String(),
-                'allDay' => false,
-                'url' => route('partidas.showPage', $partida),
-            ]);
+        $partidas = rescue(
+            fn () => Partida::query()
+                ->orderBy('fecha')
+                ->get()
+                ->map(fn (Partida $partida) => [
+                    'id' => $partida->id,
+                    'title' => $partida->titulo,
+                    'start' => $partida->fecha->toIso8601String(),
+                    'allDay' => false,
+                    'url' => route('partidas.showPage', $partida),
+                ]),
+            collect(),
+            report: false,
+        );
 
         return view('frontend.calendario', [
             'calendarEvents' => $partidas,
@@ -64,27 +59,74 @@ class FrontendController extends Controller
         $misPartidasIds = [];
 
         if ($user) {
-            $misAsistencias = $user->asistencias()
-                ->with('partida.creador')
-                ->latest()
-                ->get();
+            $misAsistencias = rescue(
+                fn () => $user->asistencias()
+                    ->with('partida.creador')
+                    ->latest()
+                    ->get(),
+                collect(),
+                report: false,
+            );
 
             $misPartidasIds = $misAsistencias->pluck('partida_id')->all();
         }
 
-        $proximasPartidas = Partida::query()
-            ->with('creador')
-            ->withCount('asistencias')
-            ->where('fecha', '>=', now()->subDay())
-            ->orderBy('fecha')
-            ->limit(12)
-            ->get();
+        $proximasPartidas = rescue(
+            fn () => Partida::query()
+                ->with('creador')
+                ->withCount('asistencias')
+                ->where('fecha', '>=', now()->subDay())
+                ->orderBy('fecha')
+                ->limit(12)
+                ->get(),
+            collect(),
+            report: false,
+        );
 
         return view('frontend.asistencia', [
             'misAsistencias' => $misAsistencias,
             'misPartidasIds' => $misPartidasIds,
             'proximasPartidas' => $proximasPartidas,
         ]);
+    }
+
+    protected function resolveJoinedPartidaIds(Request $request): array
+    {
+        if (! $request->user()) {
+            return [];
+        }
+
+        return rescue(
+            fn () => $request->user()->asistencias()->pluck('partida_id')->all(),
+            [],
+            report: false,
+        );
+    }
+
+    protected function resolveBuscarPartidas(Request $request): LengthAwarePaginator
+    {
+        try {
+            return Partida::query()
+                ->with('creador')
+                ->withCount('asistencias')
+                ->when($request->filled('deporte'), fn ($query) => $query->where('deporte', $request->string('deporte')))
+                ->when($request->filled('lugar'), fn ($query) => $query->where('lugar', 'like', '%'.$request->string('lugar').'%'))
+                ->when($request->filled('fecha'), fn ($query) => $query->whereDate('fecha', $request->input('fecha')))
+                ->orderBy('fecha')
+                ->paginate(9)
+                ->withQueryString();
+        } catch (Throwable) {
+            return new LengthAwarePaginator(
+                items: collect(),
+                total: 0,
+                perPage: 9,
+                currentPage: LengthAwarePaginator::resolveCurrentPage(),
+                options: [
+                    'path' => LengthAwarePaginator::resolveCurrentPath(),
+                    'query' => $request->query(),
+                ],
+            );
+        }
     }
 
     protected function availableSports(): array

@@ -34,10 +34,12 @@ CADDY;
     public function test_vite_configuration_points_to_the_public_build_manifest(): void
     {
         $viteConfig = require config_path('vite.php');
+        $databaseConfig = require config_path('database.php');
 
         $this->assertSame('public/build/manifest.json', $viteConfig['manifest']);
         $this->assertSame('build', $viteConfig['build_path']);
         $this->assertFileExists(public_path('index.php'));
+        $this->assertArrayHasKey(\PDO::ATTR_TIMEOUT, $databaseConfig['connections']['mysql']['options']);
     }
 
     public function test_the_homepage_respects_forwarded_proxy_headers(): void
@@ -62,7 +64,7 @@ CADDY;
         $this->assertStringContainsString('FROM dunglas/frankenphp:php8.4-bookworm', $dockerfile);
         $this->assertStringContainsString('rm -rf public/storage', $dockerfile);
         $this->assertStringContainsString('php artisan storage:link --no-interaction', $dockerfile);
-        $this->assertStringContainsString('CMD ["./bin/start-container.sh"]', $dockerfile);
+        $this->assertStringContainsString('CMD ["frankenphp", "run", "--config=/app/Caddyfile"]', $dockerfile);
     }
 
     public function test_the_dockerignore_excludes_the_local_env_file(): void
@@ -70,17 +72,5 @@ CADDY;
         $dockerignore = file_get_contents(base_path('.dockerignore'));
 
         $this->assertStringContainsString('.env', $dockerignore);
-    }
-
-    public function test_the_container_start_script_runs_optional_boot_tasks_before_starting_frankenphp(): void
-    {
-        $startScript = file_get_contents(base_path('bin/start-container.sh'));
-
-        $this->assertStringContainsString('run_optional() {', $startScript);
-        $this->assertStringContainsString('run_optional "php artisan migrate --force --no-interaction"', $startScript);
-        $this->assertStringContainsString('run_optional "php artisan config:cache --no-interaction"', $startScript);
-        $this->assertStringContainsString('run_optional "php artisan view:cache --no-interaction"', $startScript);
-        $this->assertStringContainsString('warning: command failed, continuing startup', $startScript);
-        $this->assertStringContainsString('exec frankenphp run --config=/app/Caddyfile', $startScript);
     }
 }
