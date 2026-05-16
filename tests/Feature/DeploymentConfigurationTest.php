@@ -72,13 +72,15 @@ CADDY;
         $this->assertStringContainsString('.env', $dockerignore);
     }
 
-    public function test_the_container_start_script_runs_migrations_and_warms_runtime_caches(): void
+    public function test_the_container_start_script_runs_optional_boot_tasks_before_starting_frankenphp(): void
     {
         $startScript = file_get_contents(base_path('bin/start-container.sh'));
 
-        $this->assertStringContainsString('php artisan migrate --force --no-interaction', $startScript);
-        $this->assertStringContainsString('php artisan config:cache --no-interaction', $startScript);
-        $this->assertStringContainsString('php artisan view:cache --no-interaction', $startScript);
+        $this->assertStringContainsString('run_optional() {', $startScript);
+        $this->assertStringContainsString('run_optional "php artisan migrate --force --no-interaction"', $startScript);
+        $this->assertStringContainsString('run_optional "php artisan config:cache --no-interaction"', $startScript);
+        $this->assertStringContainsString('run_optional "php artisan view:cache --no-interaction"', $startScript);
+        $this->assertStringContainsString('warning: command failed, continuing startup', $startScript);
         $this->assertStringContainsString('exec frankenphp run --config=/app/Caddyfile', $startScript);
     }
 }
